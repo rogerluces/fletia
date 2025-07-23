@@ -1,58 +1,373 @@
-
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth" >
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fletia - Panel de Envíos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Muli:wght@100&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fletia - Ruta Vehículo y Puntos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Muli:wght@100&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Muli', sans-serif; }
+    body {
+      font-family: 'Muli', sans-serif;
+      background-color: #F9FAFB; /* fondo gris muy claro */
+    }
+    main {
+      display: flex;
+      height: 100vh;
+      padding-top: 96px;
+      overflow: hidden;
+    }
+    nav.menu-lateral {
+      width: 72px;
+      background: white;
+      border-right: 1px solid #E6E8EC;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 0;
+      gap: 2.5rem;
+      position: fixed;
+      top: 96px;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+    }
+    nav.menu-lateral button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      outline-offset: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      transition: background-color 0.3s ease;
+    }
+    nav.menu-lateral button svg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      stroke: #64748B;
+      transition: stroke 0.3s ease;
+    }
+    nav.menu-lateral button:hover svg,
+    nav.menu-lateral button:focus svg {
+      stroke: #22C55E;
+    }
+    nav.menu-lateral button.active {
+      background-color: #DCFCE7;
+      box-shadow: 0 0 10px rgb(34 197 94 / 0.4);
+    }
+    nav.menu-lateral button.active svg {
+      stroke: #22C55E;
+    }
+
+    section.sidebar {
+      width: 320px;
+      background: #F3F4F6; /* gris claro para fondo */
+      border-right: 1px solid #E6E8EC;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+      margin-left: 72px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Barra de búsqueda */
+    .search-container {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1; /* gray-300 */
+      font-size: 1rem;
+      outline-offset: 2px;
+      transition: border-color 0.3s ease;
+    }
+    .search-input:focus {
+      border-color: #22C55E; /* verde vibrante */
+      box-shadow: 0 0 8px rgb(34 197 94 / 0.4);
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #E6E8EC;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgb(0 0 0 / 0.05);
+      transition: box-shadow 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      padding: 1rem;
+      outline: none;
+      position: relative;
+      flex-direction: column;
+      justify-content: flex-start;
+      height: auto; /* Crece según contenido */
+      min-height: 100px;
+    }
+    .card:hover, .card:focus {
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+    }
+    .card > .top-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      flex-grow: 1;
+    }
+    .circle-number {
+      width: 56px;
+      height: 56px;
+      background-color: #DCFCE7;
+      color: #22C55E;
+      font-weight: 700;
+      font-size: 1.75rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      flex-shrink: 0;
+      margin-right: 1rem;
+      font-family: 'Muli', sans-serif;
+      box-shadow: 0 0 6px rgb(34 197 94 / 0.4);
+    }
+    .card-title {
+      color: #1E293B;
+      font-weight: 600;
+      font-size: 1.125rem;
+      margin-bottom: 0.25rem;
+    }
+    .card-text {
+      color: #475569;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    .status-delivered {
+      position: absolute;
+      bottom: 0.8rem;
+      right: 1rem;
+      background-color: #BBF7D0;
+      color: #15803D;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      user-select: none;
+      box-shadow: 0 1px 3px rgb(21 128 61 / 0.4);
+      pointer-events: none;
+    }
+    /* Estado de ruta - debajo del número, alineado izquierda */
+    .status-route {
+      background-color: #D1FAE5; /* verde más claro */
+      color: #15803D;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 9999px;
+      user-select: none;
+      box-shadow: 0 1px 3px rgb(21 128 61 / 0.4);
+      margin-top: 0.3rem;
+      align-self: flex-start;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 3px solid #22C55E;
+      color: #1E293B;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .order-title {
+      font-weight: 700;
+      font-size: 1.75rem;
+      font-family: 'Muli', sans-serif;
+    }
+    .order-info {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+    .progress-bar-bg {
+      background-color: #D1FAE5;
+      border-radius: 9999px;
+      height: 10px;
+      width: 100%;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background-color: #22C55E;
+      height: 100%;
+      width: 33%;
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 96px;
+      background: white;
+      border-bottom: 1px solid #E6E8EC;
+      padding: 1.25rem 2rem;
+      z-index: 40;
+      user-select: none;
+      display: flex;
+      align-items: center;
+    }
+    header h1 {
+      font-family: 'Muli', sans-serif;
+      font-weight: 100;
+      font-size: 2.5rem;
+      color: #1E293B;
+      margin: 0;
+    }
+
+    section.main-content {
+      flex: 1;
+      position: relative;
+      margin-left: 72px;
+    }
   </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <header class="text-4xl font-thin text-green-600 mb-6">Fletia</header>
-  <div class="grid grid-cols-1 gap-4">
-    <div class="bg-white rounded-2xl p-6 shadow-md">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-xl font-bold text-gray-700">#657890</h2>
-        <span class="bg-orange-100 text-orange-500 text-xs px-2 py-1 rounded-full">En camino</span>
-      </div>
-      <p class="text-sm text-gray-500">Hora estimada</p>
-      <p class="text-2xl font-bold text-gray-800">15:50</p>
-      <p class="text-sm text-gray-400 mb-4">12 de diciembre de 2023</p>
-      <div class="flex items-center justify-between text-sm text-gray-600">
-        <div>
-          <p class="font-semibold">206 Beach Blvd</p>
-          <p>Miami, FL, 32104</p>
-        </div>
-        <div class="text-right">
-          <p class="font-semibold">102 Collins Ave</p>
-          <p>Chicago, IL, 20090</p>
-        </div>
-      </div>
-    </div>
+<body>
 
-    <div class="bg-white rounded-2xl p-6 shadow-md">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-xl font-bold text-gray-700">#540775</h2>
-        <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">En centro de clasificación</span>
+  <header>
+    <h1>Fletia</h1>
+  </header>
+
+  <main>
+
+    <nav class="menu-lateral" aria-label="Menú principal">
+      <button class="active" aria-current="page" title="Ruta de vehículos">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m16 0v-6a2 2 0 00-2-2h-2m-4 8h6a2 2 0 002-2v-5a2 2 0 00-2-2h-6v9zm-6 0h.01M6 17h.01" />
+        </svg>
+      </button>
+      <button title="Mantenimiento de tablas maestras">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      </button>
+      <button title="Configuración">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.6 1.6 0 002.362.862c.902-.395 1.918.442 1.573 1.43a1.6 1.6 0 00.325 1.759c.681.658.323 1.83-.588 2.055a1.6 1.6 0 00-1.07 1.283c-.138.92-1.438 1.278-2.16.627a1.6 1.6 0 00-2.381 0c-.722.65-2.022.293-2.16-.627a1.6 1.6 0 00-1.07-1.283c-.911-.224-1.27-1.397-.588-2.055a1.6 1.6 0 00.325-1.759c-.345-.988.67-1.825 1.573-1.43a1.6 1.6 0 002.362-.862zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+        </svg>
+      </button>
+    </nav>
+
+    <section class="sidebar" aria-label="Detalles de la ruta y puntos">
+
+      <div class="search-container">
+        <input
+          type="search"
+          placeholder="Buscar ruta o punto"
+          aria-label="Buscar ruta o punto"
+          class="search-input"
+        />
       </div>
-      <p class="text-sm text-gray-500">Hora estimada</p>
-      <p class="text-2xl font-bold text-gray-800">18:30</p>
-      <p class="text-sm text-gray-400 mb-4">13 de diciembre de 2023</p>
-      <div class="flex items-center justify-between text-sm text-gray-600">
-        <div>
-          <p class="font-semibold">Av. Providencia 1234</p>
-          <p>Santiago, RM</p>
+
+      <article class="order-card" aria-label="Detalles de orden de servicio">
+        <h2 class="order-title">#000001</h2>
+        <div class="status-route" aria-label="Estado de la ruta">En tránsito</div>
+        <p class="order-info"><strong>Patente:</strong> <span id="patente" class="font-mono tracking-widest"></span></p>
+        <p class="order-info"><strong>Chofer:</strong> Felipe Medina</p>
+
+        <div class="progress-bar-bg" aria-label="Progreso de entrega 33%">
+          <div class="progress-bar-fill"></div>
         </div>
-        <div class="text-right">
-          <p class="font-semibold">Calle Falsa 456</p>
-          <p>Valparaíso, V</p>
-        </div>
+
+        <p class="mt-2 text-green-600 font-semibold text-sm select-none">(Entregado 1/3)</p>
+      </article>
+
+      <div class="space-y-6" role="list" aria-label="Puntos de entrega">
+
+        <article tabindex="0" class="card" role="listitem" data-map-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.712974622828!2d-70.64687918479965!3d-33.44264398077137!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c631db28f5bb%3A0xcfdcc5a1386b9a3b!2sAv.%20Libertador%20Bernardo%20O'Higgins%201000%2C%20Santiago!5e0!3m2!1ses!2scl!4v1690151234567!5m2!1ses!2scl">
+          <div class="top-row">
+            <div class="circle-number">1</div>
+            <div>
+              <h3 class="card-title">Punto 1 - Santiago Centro</h3>
+              <p class="card-text">Av. Libertador Bernardo O'Higgins 1000, Santiago</p>
+            </div>
+          </div>
+          <div class="status-delivered" aria-label="Estado Entregado">Entregado</div>
+        </article>
+
+        <article tabindex="0" class="card" role="listitem" data-map-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3327.276701482412!2d-70.61973568479656!3d-33.4371900807784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c68494bb14f5%3A0x90a24d3498a08bc7!2sAv.%20Providencia%202000%2C%20Providencia!5e0!3m2!1ses!2scl!4v1690151234568!5m2!1ses!2scl">
+          <div class="top-row">
+            <div class="circle-number">2</div>
+            <div>
+              <h3 class="card-title">Punto 2 - Providencia</h3>
+              <p class="card-text">Av. Providencia 2000, Providencia</p>
+            </div>
+          </div>
+        </article>
+
+        <article tabindex="0" class="card" role="listitem" data-map-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3324.459859670939!2d-70.60194278479376!3d-33.42719608079626!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662ca03ab2e358d%3A0xb206522d5b3a9dc4!2sAv.%20Apoquindo%205000%2C%20Las%20Condes!5e0!3m2!1ses!2scl!4v1690151234569!5m2!1ses!2scl">
+          <div class="top-row">
+            <div class="circle-number">3</div>
+            <div>
+              <h3 class="card-title">Punto 3 - Las Condes</h3>
+              <p class="card-text">Av. Apoquindo 5000, Las Condes</p>
+            </div>
+          </div>
+        </article>
+
       </div>
-    </div>
-  </div>
+    </section>
+
+    <section class="main-content">
+      <iframe
+        id="mapFrame"
+        class="absolute inset-0 w-full h-full rounded-l-3xl border-0"
+        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d6651.233903610071!2d-70.6297177!3d-33.4379196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2scl!4v1690133456789!5m2!1ses!2scl"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Mapa centrado en Providencia, Santiago de Chile"
+      ></iframe>
+    </section>
+
+  </main>
+
+  <script>
+    function generarPatente() {
+      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const numeros = '0123456789';
+      let patente = '';
+      for(let i=0; i<3; i++) patente += letras.charAt(Math.floor(Math.random() * letras.length));
+      for(let i=0; i<3; i++) patente += numeros.charAt(Math.floor(Math.random() * numeros.length));
+      return patente;
+    }
+    document.getElementById('patente').textContent = generarPatente();
+
+    const cards = document.querySelectorAll('.card');
+    const mapFrame = document.getElementById('mapFrame');
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const src = card.getAttribute('data-map-src');
+        if (src) {
+          mapFrame.src = src;
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
